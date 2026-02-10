@@ -5,21 +5,14 @@ fzf-history-search() {
   history_cmd="fc ${=FC_ARGS} -1 0"
   history_cmd="$history_cmd | awk '!seen[\$0]++'"
 
-  # fzfの引数に --expect=ctrl-j を追加
-  # これにより、Enterならそのまま、Ctrl-jなら1行目に "ctrl-j" と出力されるようになります
-  local fzf_args=(
-    #+s +m -x -e
-    --reverse
-    --height 40%
-    #--preview-window=hidden
-    --expect=ctrl-j
-  )
+  local fzf_opts="${ZSH_FZF_HISTORY_SEARCH_FZF_OPTS:=--reverse --height 40%}"
+  local expect_key="${ZSH_FZF_HISTORY_SEARCH_EXPECT_KEY:=ctrl-j}"
 
   local result
   if (( $#BUFFER )); then
-    result=("${(f)$(eval $history_cmd | fzf "${fzf_args[@]}" -q "$BUFFER")}")
+    result=("${(f)$(eval $history_cmd | fzf ${=fzf_opts} --expect=$expect_key -q "$BUFFER")}")
   else
-    result=("${(f)$(eval $history_cmd | fzf "${fzf_args[@]}")}")
+    result=("${(f)$(eval $history_cmd | fzf ${=fzf_opts} --expect=$expect_key)}")
   fi
 
   # fzfがキャンセルされた（Escなど）場合は何もしない
